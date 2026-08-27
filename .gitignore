@@ -1,0 +1,9 @@
+# Godot
+godot/.godot/
+godot/export/
+# Secrets
+godot/config/firebase_settings.json
+firebase/functions/node_modules/
+firebase/functions/*.log
+firebase/.firebaserc
+firebase/serviceAccount*.json

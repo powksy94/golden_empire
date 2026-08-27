@@ -1,0 +1,81 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    // Champs que le client n'a PAS le droit de modifier (serveur uniquement).
+    function economyProtectedUnchanged() {
+      let before = resource.data.economy;
+      let after = request.resource.data.economy;
+      return after.gems == before.gems;
+    }
+
+    // Règle 6.3.5 : totalGoldEarned ne décroît jamais.
+    function totalGoldMonotonic() {
+      return request.resource.data.economy.totalGoldEarned >= resource.data.economy.totalGoldEarned;
+    }
+
+    function profileProtectedUnchanged() {
+      let before = resource.data.profile;
+      let after = request.resource.data.profile;
+      return after.vipActive == before.vipActive
+          && after.vipExpiresAt == before.vipExpiresAt
+          && after.adsRemoved == before.adsRemoved
+          && after.noAdsUntil == before.noAdsUntil
+          && after.offlineCapSeconds == before.offlineCapSeconds
+          && after.createdAt == before.createdAt;
+    }
+
+    // Garde-fou anti-triche (pas une valeur de balance, cf. CLAUDE.md règle 1) :
+    // un booster acheté en gemmes a un multiplicateur et une durée bornés par le
+    // catalogue Remote Config (mult max réel = 2.0, durée max réelle = 28800s).
+    // Ces bornes très larges empêchent un client d'écrire directement dans
+    // Firestore un boost écrasant, qui serait ensuite pris pour argent comptant
+    // par onAppOpen lors du calcul des gains hors-ligne (règle 6.3.1).
+    function boostSane(b) {
+      return b.mult is number && b.mult > 0 && b.mult <= 10
+          && b.expiresAt is number
+          && b.expiresAt <= request.time.toMillis() + 7 * 24 * 60 * 60 * 1000;
+    }
+
+    function boostsProtected() {
+      let after = request.resource.data.boosts;
+      return after.size() <= 20 && after.all(b, boostSane(b));
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      // Création réservée au serveur (onAppOpen crée le document).
+      allow create: if false;
+      allow update: if isOwner(userId)
+                    && economyProtectedUnchanged()
+                    && totalGoldMonotonic()
+                    && profileProtectedUnchanged()
+                    && boostsProtected();
+      allow delete: if false;
+
+      // Garde-fou anti-triche : le niveau doit rester un entier borné, sinon un
+      // client pourrait écrire une valeur énorme directement dans Firestore et
+      // gonfler artificiellement production_per_sec (donc les gains hors-ligne
+      // crédités par onAppOpen). 1 000 000 est très au-delà de toute progression
+      // légitime au stade actuel (formules linéaires en niveau, cf. economy_formulas.gd).
+      match /generators/{generatorId} {
+        allow read: if isOwner(userId);
+        allow write: if isOwner(userId)
+                    && request.resource.data.level is int
+                    && request.resource.data.level >= 0
+                    && request.resource.data.level <= 1000000
+                    && request.resource.data.unlockedAt is int;
+      }
+
+      // Achats : écrits uniquement par validatePurchase (Admin SDK bypass les règles).
+      match /purchases/{transactionId} {
+        allow read: if isOwner(userId);
+        allow write: if false;
+      }
+    }
+  }
+}

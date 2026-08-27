@@ -1,0 +1,130 @@
+{
+  "config_version": 1,
+  "generators": [
+    {
+      "id": "peasant",
+      "tier": 1,
+      "name_key": "gen.peasant",
+      "base_cost": 10,
+      "growth": 1.15,
+      "base_production": 0.5,
+      "unlock_at": 0
+    },
+    {
+      "id": "farm",
+      "tier": 2,
+      "name_key": "gen.farm",
+      "base_cost": 100,
+      "growth": 1.15,
+      "base_production": 4,
+      "unlock_at": 500
+    },
+    {
+      "id": "mine",
+      "tier": 3,
+      "name_key": "gen.mine",
+      "base_cost": 1200,
+      "growth": 1.15,
+      "base_production": 40,
+      "unlock_at": 6000
+    },
+    {
+      "id": "caravan",
+      "tier": 4,
+      "name_key": "gen.caravan",
+      "base_cost": 15000,
+      "growth": 1.16,
+      "base_production": 400,
+      "unlock_at": 80000
+    },
+    {
+      "id": "bank",
+      "tier": 5,
+      "name_key": "gen.bank",
+      "base_cost": 200000,
+      "growth": 1.16,
+      "base_production": 4000,
+      "unlock_at": 1000000
+    },
+    {
+      "id": "port",
+      "tier": 6,
+      "name_key": "gen.port",
+      "base_cost": 2500000,
+      "growth": 1.17,
+      "base_production": 40000,
+      "unlock_at": 12000000
+    },
+    {
+      "id": "guild",
+      "tier": 7,
+      "name_key": "gen.guild",
+      "base_cost": 35000000,
+      "growth": 1.17,
+      "base_production": 400000,
+      "unlock_at": 150000000
+    }
+  ],
+  "prestige_threshold": 1000000,
+  "prestige_mult_per_point": 0.02,
+  "offline_factor_default": 0.5,
+  "offline_factor_vip": 1,
+  "offline_cap_seconds_default": 28800,
+  "offline_cap_seconds_extended": 86400,
+  "offline_cap_seconds_vip": 2592000,
+  "vip_production_bonus": 0.5,
+  "vip_daily_gems": 20,
+  "starting_gems": 0,
+  "products": {
+    "starter_pack": {
+      "type": "bundle",
+      "gems": 150,
+      "boost_mult": 2,
+      "boost_seconds": 3600,
+      "no_ads_seconds": 86400
+    },
+    "remove_ads": {
+      "type": "remove_ads"
+    },
+    "vip_monthly": {
+      "type": "vip",
+      "duration_days": 30
+    },
+    "gems_small": {
+      "type": "gems",
+      "gems": 100
+    },
+    "gems_medium": {
+      "type": "gems",
+      "gems": 550
+    },
+    "gems_large": {
+      "type": "gems",
+      "gems": 1200
+    },
+    "gems_mega": {
+      "type": "gems",
+      "gems": 2600
+    },
+    "gems_ultra": {
+      "type": "gems",
+      "gems": 7000
+    },
+    "gems_whale": {
+      "type": "gems",
+      "gems": 15000
+    }
+  },
+  "boosters": {
+    "boost_production_x2": {
+      "gem_cost": 50,
+      "mult": 2,
+      "seconds": 3600
+    },
+    "boost_offline_x2": {
+      "gem_cost": 40,
+      "offline_mult": 2,
+      "seconds": 28800
+    }
+  }
+}
