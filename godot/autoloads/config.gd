@@ -77,9 +77,17 @@ func get_generator(id: String) -> GeneratorDef:
 	return _generator_index.get(id)
 
 
+func get_products() -> Dictionary:
+	return _values.get("products", {})
+
+
 func get_product(product_id: String) -> Dictionary:
-	return _values.get("products", {}).get(product_id, {})
+	return get_products().get(product_id, {})
+
+
+func get_boosters() -> Dictionary:
+	return _values.get("boosters", {})
 
 
 func get_booster(booster_id: String) -> Dictionary:
-	return _values.get("boosters", {}).get(booster_id, {})
+	return get_boosters().get(booster_id, {})

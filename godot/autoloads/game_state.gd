@@ -66,6 +66,16 @@ func spend_gems(amount: int) -> bool:
 	return true
 
 
+## DEBUG UNIQUEMENT — crédite des gemmes sans passer par validatePurchase.
+## L'appelant (UI) doit vérifier OS.is_debug_build() avant d'appeler ceci ;
+## permet de tester les boosters tant qu'aucun moyen légitime d'obtenir des
+## gemmes n'existe (StoreKit/Play Billing pas encore intégrés).
+func add_gems_debug(amount: int) -> void:
+	data.economy["gems"] = int(data.economy["gems"]) + amount
+	dirty = true
+	gems_changed.emit(int(data.economy["gems"]))
+
+
 func set_generator_level(id: String, level: int) -> void:
 	if not data.generators.has(id):
 		data.generators[id] = {"level": 0, "unlockedAt": now_ms()}

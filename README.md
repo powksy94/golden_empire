@@ -94,11 +94,15 @@ Système de design dans `godot/scripts/ui/empire_theme.gd` (aucune couleur/polic
   - `scripts/ui/generator_row.gd` — une ligne de registre par générateur (verrouillé/déverrouillé, achat selon le mode courant).
   - `scripts/ui/buy_mode.gd` + `buy_mode_selector.gd` — sélecteur x1/x10/MAX partagé par toutes les lignes.
   - `scripts/ui/tap_button.gd` — bouton "Frapper une pièce" + retour visuel du gain.
-  - `scripts/ui/footer_panel.gd` — bouton de prestige + utilitaires (sauvegarde manuelle, cheat debug).
+  - `scripts/ui/footer_panel.gd` — bouton de prestige + utilitaires (boutique, sauvegarde manuelle, cheat debug).
+  - `scripts/ui/shop_screen.gd` — écran boutique superposé (overlay masqué par défaut, ouvert depuis le pied de page).
+  - `scripts/ui/shop_header.gd` — titre, solde de gemmes, bouton de fermeture de la boutique.
+  - `scripts/ui/shop_row.gd` — ligne générique (nom, sous-texte, bouton d'action), réutilisée pour boosters et catalogue IAP.
+  - `scripts/ui/shop_catalog.gd` — pur formatage : traduit un booster/produit Remote Config en texte d'affichage (aucune construction de nœud).
   - `scenes/main.gd` ne fait plus que la séquence de boot et instancie `GameScreen`.
-- Le bouton `[DEBUG] +1000 or` (visible seulement en build debug, via `OS.is_debug_build()`) permet de tester la boucle sans attendre.
+- Le bouton `[DEBUG] +1000 or` (footer) et `[DEBUG] +100 gemmes` (boutique), visibles seulement en build debug via `OS.is_debug_build()`, permettent de tester la boucle et les boosters sans attendre un vrai moyen d'obtenir gemmes/or.
 
-Cette UI n'a pas pu être vérifiée visuellement dans ce fil (pas d'accès à l'éditeur Godot) — à valider avec F5 et à ajuster (tailles, espacements) une fois vue à l'écran.
+Boucle principale (achat en masse x1/x10/MAX, prestige, tap) vérifiée visuellement dans l'éditeur. L'écran boutique est neuf et n'a pas encore été vu à l'écran — à valider avec F5.
 
 ## Non couvert (à itérer avec Claude Code)
 
@@ -106,5 +110,6 @@ Cette UI n'a pas pu être vérifiée visuellement dans ce fil (pas d'accès à l
 - Acknowledge/consume des achats Google Play, abonnements VIP via `subscriptionsv2`.
 - Intégration StoreKit / Play Billing côté Godot (plugins natifs).
 - Notifications (FCM + fonction planifiée pour les déclencheurs de la section 5).
-- Streak quotidien, gemmes VIP quotidiennes, `offline_mult` des boosters (champ prévu, logique serveur à écrire).
+- Streak quotidien, gemmes VIP quotidiennes, `offline_mult` des boosters (champ prévu, logique serveur à écrire — affiché "bientôt disponible" dans `shop_screen.gd` en attendant).
+- Achat réel des produits IAP (gemmes, VIP, retrait pub, pack de démarrage) : catalogue affiché dans l'écran boutique, mais bouton désactivé tant que StoreKit/Play Billing ne sont pas intégrés côté Godot.
 - Stratégie de merge local/serveur si l'app est tuée avant le dernier push Firestore.

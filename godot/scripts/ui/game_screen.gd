@@ -10,6 +10,7 @@ var _tap_btn: TapButton
 var _buy_mode: BuyModeSelector
 var _list: VBoxContainer
 var _footer: FooterPanel
+var _shop: ShopScreen
 var _gen_rows: Dictionary = {}   # id -> GeneratorRow
 
 
@@ -74,6 +75,10 @@ func _build() -> void:
 	root.add_child(_footer)
 
 	_rebuild_generator_rows()
+
+	_shop = ShopScreen.create()
+	_footer.open_shop_requested.connect(func(): _shop.open())
+	add_child(_shop)
 
 
 func _rebuild_generator_rows() -> void:

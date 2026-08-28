@@ -1,7 +1,9 @@
 class_name FooterPanel
 extends VBoxContainer
 ## Pied de page : bouton de prestige + son indice, et actions utilitaires
-## (sauvegarde manuelle, cheat de debug).
+## (boutique, sauvegarde manuelle, cheat de debug).
+
+signal open_shop_requested
 
 var _prestige_btn: Button
 var _prestige_hint: Label
@@ -32,6 +34,12 @@ func _build() -> void:
 	utility_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	utility_row.add_theme_constant_override("separation", 16)
 	add_child(utility_row)
+
+	var shop_btn := Button.new()
+	shop_btn.theme_type_variation = "QuietButton"
+	shop_btn.text = "Boutique"
+	shop_btn.pressed.connect(func(): open_shop_requested.emit())
+	utility_row.add_child(shop_btn)
 
 	var save_btn := Button.new()
 	save_btn.theme_type_variation = "QuietButton"
