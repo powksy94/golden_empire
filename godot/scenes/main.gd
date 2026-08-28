@@ -53,14 +53,6 @@ func _boot() -> void:
 	var gains := float(d.get("offlineGains", 0.0))
 	var away := int(d.get("secondsAway", 0))
 	if gains > 0.0:
-		_screen.set_status("Bon retour ! +%s or pendant %s" % [NumberFormat.short(gains), _fmt_duration(away)])
+		_screen.set_status("Bon retour ! +%s or pendant %s" % [NumberFormat.short(gains), NumberFormat.duration(away)])
 	else:
 		_screen.set_status("Connecté — uid %s" % FirebaseClient.uid.left(6))
-
-
-func _fmt_duration(seconds: int) -> String:
-	@warning_ignore("integer_division")
-	var h := seconds / 3600
-	@warning_ignore("integer_division")
-	var m := (seconds % 3600) / 60
-	return "%dh%02d" % [h, m] if h > 0 else "%d min" % m

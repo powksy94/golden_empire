@@ -14,3 +14,12 @@ static func short(value: float, decimals: int = 2) -> String:
 		v /= 1000.0
 		idx += 1
 	return String.num(v, decimals) + SUFFIXES[idx]
+
+
+## "2h30" ou "45 min" — pour les durées de boost, cap hors-ligne, etc.
+static func duration(seconds: int) -> String:
+	@warning_ignore("integer_division")
+	var h := seconds / 3600
+	@warning_ignore("integer_division")
+	var m := (seconds % 3600) / 60
+	return "%dh%02d" % [h, m] if h > 0 else "%d min" % m
