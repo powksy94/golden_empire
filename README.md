@@ -55,6 +55,34 @@ firebase deploy --only firestore:rules,remoteconfig,functions
 Activer dans la console : Authentication → Anonyme ; Firestore ; Remote Config.
 Pour `validatePurchase` Android : lier le compte de service des Functions à la Play Console (API access) et définir le paramètre `ANDROID_PACKAGE_NAME`.
 
+**Émulateurs** (aucun projet réel requis, testé et fonctionnel) :
+```bash
+cd firebase && firebase emulators:start --only functions,firestore,auth --project demo-empire-dor
+```
+UI sur http://127.0.0.1:4000. `onAppOpen` et `validatePurchase` sont appelables en HTTP direct via
+`http://127.0.0.1:5001/demo-empire-dor/europe-west1/<nom>` avec un idToken obtenu via
+`POST http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/accounts:signUp?key=fake-api-key`.
+
+**Sécuriser le plan Blaze avant tout déploiement réel** (obligatoire pour les Cloud Functions v2) :
+1. Google Cloud Console → Facturation → Budgets et alertes : créer un budget symbolique (ex. 5 €) avec alertes à 50/90/100 %. **À faire par toi** (console web, pas d'accès depuis ici).
+2. `maxInstances` des Cloud Functions volontairement bas (`2`, cf. `index.js`) tant qu'il n'y a aucun utilisateur réel — à remonter avant le soft launch.
+3. Firebase App Check — **pas encore actionnable** : nécessite un SDK natif par plateforme (Play Integrity / App Attest) pour générer un token valide, or Godot n'a pas de SDK Firebase officiel (`FirebaseClient` est en REST pur, cf. § Choix d'implémentation). L'activer sans ce plugin natif bloquerait le jeu entier. À revoir en même temps que StoreKit/Play Billing (Non couvert).
+4. Security Rules : déjà verrouillées à `isOwner(userId)` (aucun accès anonyme non authentifié), cf. `firestore.rules`.
+
+**Piège rencontré au premier déploiement réel** — après `firebase deploy`, les deux fonctions
+répondaient `401 Unauthorized` malgré un déploiement "réussi". Cause : les Cloud Functions v2
+(2nd Gen, basées sur Cloud Run) ont **deux surfaces IAM distinctes**, et `firebase deploy` n'a
+posé le binding public sur **aucune des deux** cette fois-ci (bindings vides à la vérification) :
+- `roles/run.invoker` sur le service Cloud Run sous-jacent (`gcloud run services
+  add-iam-policy-binding <nom-minuscule> --member=allUsers --role=roles/run.invoker`)
+- `roles/cloudfunctions.invoker` sur la ressource Cloud Function elle-même (`gcloud functions
+  add-invoker-policy-binding <NomFonction> --region=... --member=allUsers`)
+
+Sans `gcloud` installé, ces deux appels peuvent aussi se faire en REST directement sur
+`run.googleapis.com/v2/.../services/<service>:setIamPolicy` et
+`cloudfunctions.googleapis.com/v2/.../functions/<Fonction>:setIamPolicy`. Si un futur déploiement
+répète le problème, vérifier ces deux policies AVANT de chercher ailleurs.
+
 ## Flux de démarrage (main.gd)
 
 1. `SaveManager.load_local()` → jouable immédiatement, même hors connexion.

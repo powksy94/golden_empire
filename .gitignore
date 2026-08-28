@@ -5,5 +5,10 @@ godot/export/
 godot/config/firebase_settings.json
 firebase/functions/node_modules/
 firebase/functions/*.log
+firebase/*.log
+firebase/*-debug.log
 firebase/.firebaserc
 firebase/serviceAccount*.json
+firebase/functions/.env
+firebase/functions/.env.local
+firebase/functions/.env.*
