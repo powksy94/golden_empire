@@ -5,7 +5,10 @@
  * pour obtenir la même forme que godot/config/remote_config_defaults.json.
  */
 const admin = require("firebase-admin");
-const localDefaults = require("../../remote_config/defaults.json");
+// Doit vivre sous functions/ (cf. build_template.js) : Cloud Functions ne
+// déploie que ce dossier, un chemin qui en sort casse en production tout en
+// fonctionnant en local (repo entier présent sur disque).
+const localDefaults = require("../remote_config/defaults.json");
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 let cache = { loadedAt: 0, values: null };

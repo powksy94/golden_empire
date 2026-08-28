@@ -29,21 +29,16 @@ service cloud.firestore {
           && after.createdAt == before.createdAt;
     }
 
-    // Garde-fou anti-triche (pas une valeur de balance, cf. CLAUDE.md règle 1) :
-    // un booster acheté en gemmes a un multiplicateur et une durée bornés par le
-    // catalogue Remote Config (mult max réel = 2.0, durée max réelle = 28800s).
-    // Ces bornes très larges empêchent un client d'écrire directement dans
-    // Firestore un boost écrasant, qui serait ensuite pris pour argent comptant
-    // par onAppOpen lors du calcul des gains hors-ligne (règle 6.3.1).
-    function boostSane(b) {
-      return b.mult is number && b.mult > 0 && b.mult <= 10
-          && b.expiresAt is number
-          && b.expiresAt <= request.time.toMillis() + 7 * 24 * 60 * 60 * 1000;
-    }
-
+    // Garde-fou anti-triche (pas une valeur de balance, cf. CLAUDE.md règle 1).
+    // Le langage des Firestore Rules n'a PAS de comprehension de liste
+    // (`.all()`/`.map()` n'existent pas ici, contrairement à CEL complet —
+    // confirmé par le compilateur : "Invalid function name: all"). On ne peut
+    // donc borner que la taille de la liste, pas le contenu de chaque boost.
+    // La vraie protection contre un boost falsifié (mult/durée démesurés) est
+    // le clamp côté serveur dans onAppOpen.js, au moment de calculer les gains
+    // hors-ligne — voir sanitizeBoosts().
     function boostsProtected() {
-      let after = request.resource.data.boosts;
-      return after.size() <= 20 && after.all(b, boostSane(b));
+      return request.resource.data.boosts.size() <= 20;
     }
 
     match /users/{userId} {

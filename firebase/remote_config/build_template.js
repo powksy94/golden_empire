@@ -3,16 +3,21 @@
 /**
  * Génère remoteconfig.template.json (format Firebase CLI) à partir de la source
  * unique godot/config/remote_config_defaults.json, et copie cette dernière en
- * remote_config/defaults.json pour le fallback des Cloud Functions.
+ * functions/remote_config/defaults.json pour le fallback des Cloud Functions.
  *
- * Usage : node remote_config/build_template.js && firebase deploy --only remoteconfig
+ * ⚠ Le fallback DOIT vivre sous functions/ : Cloud Functions ne déploie que le
+ * contenu de ce dossier (cf. "source": "functions" dans firebase.json), donc un
+ * require() qui en sort (ex. "../../remote_config/...") casse au déploiement
+ * réel tout en fonctionnant en local/émulateur (repo entier présent sur disque).
+ *
+ * Usage : node remote_config/build_template.js && firebase deploy --only remoteconfig,functions
  */
 const fs = require("fs");
 const path = require("path");
 
 const SRC = path.resolve(__dirname, "../../godot/config/remote_config_defaults.json");
 const OUT_TEMPLATE = path.resolve(__dirname, "remoteconfig.template.json");
-const OUT_DEFAULTS = path.resolve(__dirname, "defaults.json");
+const OUT_DEFAULTS = path.resolve(__dirname, "../functions/remote_config/defaults.json");
 
 const DESCRIPTIONS = {
   config_version: "Version de la balance (incrémenter à chaque changement)",
@@ -49,6 +54,7 @@ const template = {
 };
 
 fs.writeFileSync(OUT_TEMPLATE, JSON.stringify(template, null, 2) + "\n");
+fs.mkdirSync(path.dirname(OUT_DEFAULTS), { recursive: true });
 fs.writeFileSync(OUT_DEFAULTS, JSON.stringify(src, null, 2) + "\n");
 console.log(`✔ ${path.relative(process.cwd(), OUT_TEMPLATE)}`);
 console.log(`✔ ${path.relative(process.cwd(), OUT_DEFAULTS)}`);

@@ -10,7 +10,7 @@
     },
     "generators": {
       "defaultValue": {
-        "value": "[{\"id\":\"peasant\",\"tier\":1,\"name_key\":\"gen.peasant\",\"base_cost\":10,\"growth\":1.15,\"base_production\":0.5,\"unlock_at\":0},{\"id\":\"farm\",\"tier\":2,\"name_key\":\"gen.farm\",\"base_cost\":100,\"growth\":1.15,\"base_production\":4,\"unlock_at\":500},{\"id\":\"mine\",\"tier\":3,\"name_key\":\"gen.mine\",\"base_cost\":1200,\"growth\":1.15,\"base_production\":40,\"unlock_at\":6000},{\"id\":\"caravan\",\"tier\":4,\"name_key\":\"gen.caravan\",\"base_cost\":15000,\"growth\":1.16,\"base_production\":400,\"unlock_at\":80000},{\"id\":\"bank\",\"tier\":5,\"name_key\":\"gen.bank\",\"base_cost\":200000,\"growth\":1.16,\"base_production\":4000,\"unlock_at\":1000000},{\"id\":\"port\",\"tier\":6,\"name_key\":\"gen.port\",\"base_cost\":2500000,\"growth\":1.17,\"base_production\":40000,\"unlock_at\":12000000},{\"id\":\"guild\",\"tier\":7,\"name_key\":\"gen.guild\",\"base_cost\":35000000,\"growth\":1.17,\"base_production\":400000,\"unlock_at\":150000000}]"
+        "value": "[{\"id\":\"peasant\",\"tier\":1,\"name_key\":\"gen.peasant\",\"base_cost\":10,\"growth\":1.15,\"base_production\":0.5,\"unlock_at\":0,\"name\":\"Paysan\"},{\"id\":\"farm\",\"tier\":2,\"name_key\":\"gen.farm\",\"base_cost\":100,\"growth\":1.15,\"base_production\":4,\"unlock_at\":500,\"name\":\"Ferme\"},{\"id\":\"mine\",\"tier\":3,\"name_key\":\"gen.mine\",\"base_cost\":1200,\"growth\":1.15,\"base_production\":40,\"unlock_at\":6000,\"name\":\"Mine\"},{\"id\":\"caravan\",\"tier\":4,\"name_key\":\"gen.caravan\",\"base_cost\":15000,\"growth\":1.16,\"base_production\":400,\"unlock_at\":80000,\"name\":\"Caravane\"},{\"id\":\"bank\",\"tier\":5,\"name_key\":\"gen.bank\",\"base_cost\":200000,\"growth\":1.16,\"base_production\":4000,\"unlock_at\":1000000,\"name\":\"Banque\"},{\"id\":\"port\",\"tier\":6,\"name_key\":\"gen.port\",\"base_cost\":2500000,\"growth\":1.17,\"base_production\":40000,\"unlock_at\":12000000,\"name\":\"Port\"},{\"id\":\"guild\",\"tier\":7,\"name_key\":\"gen.guild\",\"base_cost\":35000000,\"growth\":1.17,\"base_production\":400000,\"unlock_at\":150000000,\"name\":\"Guilde\"}]"
       },
       "valueType": "JSON",
       "description": "Grille des générateurs (GDD 3.5) — tableau JSON"
@@ -28,6 +28,13 @@
       },
       "valueType": "NUMBER",
       "description": "Multiplicateur permanent par point de prestige"
+    },
+    "tap_gold_amount": {
+      "defaultValue": {
+        "value": "1"
+      },
+      "valueType": "NUMBER",
+      "description": ""
     },
     "offline_factor_default": {
       "defaultValue": {

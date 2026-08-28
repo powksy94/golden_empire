@@ -12,14 +12,14 @@
  * iOS     : App Store Server API — À IMPLÉMENTER (squelette + TODO ci-dessous).
  */
 const crypto = require("crypto");
-const admin = require("firebase-admin");
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { defineString } = require("firebase-functions/params");
+const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 const { google } = require("googleapis");
 const { loadConfig } = require("./config");
 
-const db = admin.firestore;
-const ANDROID_PACKAGE = defineString("ANDROID_PACKAGE_NAME", { default: "com.example.empiredor" });
+const db = getFirestore();
+const ANDROID_PACKAGE = defineString("ANDROID_PACKAGE_NAME", { default: "com.powksy.goldenempire" });
 
 // ------------------------------------------------------------ vérification stores
 
@@ -53,7 +53,7 @@ function grantProduct(product, doc, nowMs) {
   const granted = {};
   const gems = product.gems || 0;
   if (gems > 0) {
-    update["economy.gems"] = db.FieldValue.increment(gems);
+    update["economy.gems"] = FieldValue.increment(gems);
     granted.gems = gems;
   }
   switch (product.type) {
@@ -111,7 +111,7 @@ exports.validatePurchase = onCall(async (request) => {
 
   // Idempotence : l'id de transaction est un hash du token (jamais le token brut en clé).
   const txId = crypto.createHash("sha256").update(`${platform}:${purchaseToken}`).digest("hex");
-  const userRef = db().collection("users").doc(uid);
+  const userRef = db.collection("users").doc(uid);
   const purchaseRef = userRef.collection("purchases").doc(txId);
 
   const existing = await purchaseRef.get();
@@ -133,7 +133,7 @@ exports.validatePurchase = onCall(async (request) => {
   }
 
   const nowMs = Date.now();
-  const outcome = await db().runTransaction(async (tx) => {
+  const outcome = await db.runTransaction(async (tx) => {
     const [userSnap, purchaseSnap] = await Promise.all([tx.get(userRef), tx.get(purchaseRef)]);
     if (purchaseSnap.exists) return { status: "already_credited", granted: purchaseSnap.data().granted };
     if (!userSnap.exists) throw new HttpsError("failed-precondition", "Utilisateur inexistant (appeler onAppOpen d'abord).");

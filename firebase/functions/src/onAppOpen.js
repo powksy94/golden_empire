@@ -9,12 +9,12 @@
  *   - state  : snapshot autoritaire { profile, economy, generators, boosts, settings }
  *   - config : valeurs Remote Config typées (même forme que remote_config_defaults.json)
  */
-const admin = require("firebase-admin");
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
+const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 const { loadConfig } = require("./config");
 const eco = require("./economy");
 
-const db = admin.firestore;
+const db = getFirestore();
 
 function defaultUserDoc(nowMs, deviceId, config) {
   return {
@@ -43,6 +43,25 @@ function defaultUserDoc(nowMs, deviceId, config) {
   };
 }
 
+// Garde-fous anti-triche (pas des valeurs de balance, cf. CLAUDE.md règle 1) :
+// les Firestore Rules ne peuvent borner que la TAILLE de `boosts` (pas de
+// comprehension de liste dans ce langage, cf. firestore.rules). Un client
+// pourrait donc y écrire un mult/expiresAt démesuré ; on le neutralise ici,
+// juste avant que ça influence le calcul des gains hors-ligne crédités.
+const MAX_BOOST_MULT = 10;
+const MAX_BOOST_HORIZON_MS = 7 * 24 * 60 * 60 * 1000;
+
+function sanitizeBoosts(boosts, nowMs) {
+  return (boosts || [])
+    .filter((b) => (b.expiresAt || 0) > nowMs)
+    .slice(0, 20)
+    .map((b) => ({
+      ...b,
+      mult: Math.min(Math.max(Number(b.mult) || 1, 0), MAX_BOOST_MULT),
+      expiresAt: Math.min(Number(b.expiresAt) || nowMs, nowMs + MAX_BOOST_HORIZON_MS),
+    }));
+}
+
 /** Facteur et cap offline effectifs pour ce joueur (VIP > achat cap étendu > défaut). */
 function offlineParams(profile, config, nowMs) {
   const vip = profile.vipActive && (profile.vipExpiresAt || 0) > nowMs;
@@ -62,10 +81,10 @@ exports.onAppOpen = onCall(async (request) => {
   const { clientTime, deviceId } = request.data || {};
   const config = await loadConfig();
   const nowMs = Date.now();
-  const userRef = db().collection("users").doc(uid);
+  const userRef = db.collection("users").doc(uid);
   const gensRef = userRef.collection("generators");
 
-  const result = await db().runTransaction(async (tx) => {
+  const result = await db.runTransaction(async (tx) => {
     const [userSnap, gensSnap] = await Promise.all([tx.get(userRef), tx.get(gensRef)]);
 
     // Premier lancement : création du document (le client n'a pas le droit de créer).
@@ -86,17 +105,17 @@ exports.onAppOpen = onCall(async (request) => {
     const lastActive = doc.economy?.lastActiveTimestamp || nowMs;
     const secondsAway = Math.max(0, (nowMs - lastActive) / 1000);
 
-    const mult = eco.globalMultiplier(doc.economy, doc.profile, doc.boosts, config, nowMs);
+    // Purge les boosts expirés ET borne mult/durée (cf. sanitizeBoosts ci-dessus)
+    // avant de les laisser influencer le calcul des gains.
+    const boosts = sanitizeBoosts(doc.boosts, nowMs);
+    const mult = eco.globalMultiplier(doc.economy, doc.profile, boosts, config, nowMs);
     const pps = eco.productionPerSec(levels, config.generators, mult);
     const { factor, cap } = offlineParams(doc.profile, config, nowMs);
     const gains = eco.offlineGains(pps, secondsAway, factor, cap);
 
-    // Boosts expirés purgés côté serveur.
-    const boosts = (doc.boosts || []).filter((b) => (b.expiresAt || 0) > nowMs);
-
     const update = {
-      "economy.gold": db.FieldValue.increment(gains),
-      "economy.totalGoldEarned": db.FieldValue.increment(gains),
+      "economy.gold": FieldValue.increment(gains),
+      "economy.totalGoldEarned": FieldValue.increment(gains),
       "economy.lastActiveTimestamp": nowMs,
       "profile.lastSeenAt": nowMs,
       boosts,
