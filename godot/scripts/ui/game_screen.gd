@@ -6,6 +6,7 @@ extends Control
 ## relayer des messages de statut pendant la séquence de boot.
 
 var _header: HeaderPanel
+var _diorama: DioramaView
 var _tap_btn: TapButton
 var _buy_mode: BuyModeSelector
 var _list: VBoxContainer
@@ -25,8 +26,14 @@ func _ready() -> void:
 	GameState.gold_changed.connect(func(_g): _refresh())
 	GameState.gems_changed.connect(func(_g): _refresh())
 	Economy.production_changed.connect(func(_p): _refresh())
-	Config.config_updated.connect(_rebuild_generator_rows)
+	Economy.tapped.connect(func(_amount): _diorama.pulse())
+	Config.config_updated.connect(_on_config_updated)
 	Economy.prestiged.connect(func(c, m): set_status("Prestige ! +%d pts de prestige — multiplicateur x%.2f" % [int(c), m]))
+
+
+func _on_config_updated() -> void:
+	_rebuild_generator_rows()
+	_diorama.rebuild()
 
 
 func set_status(text: String) -> void:
@@ -54,6 +61,9 @@ func _build() -> void:
 
 	_header = HeaderPanel.create()
 	root.add_child(_header)
+
+	_diorama = DioramaView.create()
+	root.add_child(_diorama)
 
 	_tap_btn = TapButton.create()
 	root.add_child(_tap_btn)
@@ -96,6 +106,7 @@ func _rebuild_generator_rows() -> void:
 
 func _refresh() -> void:
 	_header.refresh()
+	_diorama.refresh()
 	_tap_btn.refresh()
 	for id in _gen_rows:
 		var def := Config.get_generator(id)

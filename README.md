@@ -91,6 +91,7 @@ Système de design dans `godot/scripts/ui/empire_theme.gd` (aucune couleur/polic
 - **Composants** (1 responsabilité par fichier, sur le modèle de `generator_row.gd`) :
   - `scripts/ui/game_screen.gd` — assemble l'écran et réagit seul aux signaux GameState/Economy/Config.
   - `scripts/ui/header_panel.gd` — titre, statut de boot, or, gemmes, production/s.
+  - `scripts/ui/diorama_view.gd` + `generator_actor.gd` — bandeau visuel "village" au-dessus du registre : une silhouette géométrique par type de générateur débloqué (Polygon2D, aucun asset externe pour l'instant), animation idle, réagit au tap. Remplaçable par de vrais sprites en ne changeant que `GeneratorActor._make_shape()`.
   - `scripts/ui/generator_row.gd` — une ligne de registre par générateur (verrouillé/déverrouillé, achat selon le mode courant).
   - `scripts/ui/buy_mode.gd` + `buy_mode_selector.gd` — sélecteur x1/x10/MAX partagé par toutes les lignes.
   - `scripts/ui/tap_button.gd` — bouton "Frapper une pièce" + retour visuel du gain.
@@ -102,7 +103,7 @@ Système de design dans `godot/scripts/ui/empire_theme.gd` (aucune couleur/polic
   - `scenes/main.gd` ne fait plus que la séquence de boot et instancie `GameScreen`.
 - Le bouton `[DEBUG] +1000 or` (footer) et `[DEBUG] +100 gemmes` (boutique), visibles seulement en build debug via `OS.is_debug_build()`, permettent de tester la boucle et les boosters sans attendre un vrai moyen d'obtenir gemmes/or.
 
-Boucle principale (achat en masse x1/x10/MAX, prestige, tap) vérifiée visuellement dans l'éditeur. L'écran boutique est neuf et n'a pas encore été vu à l'écran — à valider avec F5.
+Boucle principale (achat en masse x1/x10/MAX, prestige, tap) vérifiée visuellement dans l'éditeur. L'écran boutique et le diorama sont neufs et n'ont pas encore été vus à l'écran — à valider avec F5.
 
 ## Non couvert (à itérer avec Claude Code)
 
@@ -112,4 +113,5 @@ Boucle principale (achat en masse x1/x10/MAX, prestige, tap) vérifiée visuelle
 - Notifications (FCM + fonction planifiée pour les déclencheurs de la section 5).
 - Streak quotidien, gemmes VIP quotidiennes, `offline_mult` des boosters (champ prévu, logique serveur à écrire — affiché "bientôt disponible" dans `shop_screen.gd` en attendant).
 - Achat réel des produits IAP (gemmes, VIP, retrait pub, pack de démarrage) : catalogue affiché dans l'écran boutique, mais bouton désactivé tant que StoreKit/Play Billing ne sont pas intégrés côté Godot.
+- Vrais assets visuels pour le diorama (personnages, bâtiments) : `generator_actor.gd` dessine des silhouettes géométriques (Polygon2D) en attendant un pack d'assets (ex. Kenney.nl, CC0) ou de l'art dédié.
 - Stratégie de merge local/serveur si l'app est tuée avant le dernier push Firestore.
