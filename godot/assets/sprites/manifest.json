@@ -1,0 +1,35 @@
+{
+  "pixel_scale": 8,
+  "background": {},
+  "coin": { "texture": "res://assets/sprites/village/coin.png" },
+  "generators": {
+    "peasant": {
+      "building": { "texture": "res://assets/sprites/village/building_peasant.png", "height": 170 },
+      "worker": { "files": ["res://assets/sprites/village/worker.png"], "fps": 1 }
+    },
+    "farm": {
+      "building": { "texture": "res://assets/sprites/village/building_farm.png", "height": 200 },
+      "worker": { "files": ["res://assets/sprites/village/worker.png"], "fps": 1 }
+    },
+    "mine": {
+      "building": { "texture": "res://assets/sprites/village/building_mine.png", "height": 220 },
+      "worker": { "files": ["res://assets/sprites/village/worker.png"], "fps": 1 }
+    },
+    "caravan": {
+      "building": { "texture": "res://assets/sprites/village/building_caravan.png", "height": 175 },
+      "worker": { "files": ["res://assets/sprites/village/worker.png"], "fps": 1 }
+    },
+    "bank": {
+      "building": { "texture": "res://assets/sprites/village/building_bank.png", "height": 290 },
+      "worker": { "files": ["res://assets/sprites/village/worker.png"], "fps": 1 }
+    },
+    "port": {
+      "building": { "texture": "res://assets/sprites/village/building_port.png", "height": 230 },
+      "worker": { "files": ["res://assets/sprites/village/worker.png"], "fps": 1 }
+    },
+    "guild": {
+      "building": { "texture": "res://assets/sprites/village/building_guild.png", "height": 340 },
+      "worker": { "files": ["res://assets/sprites/village/worker.png"], "fps": 1 }
+    }
+  }
+}
