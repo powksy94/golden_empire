@@ -87,7 +87,7 @@ func buy(id: String, count: int = 1) -> bool:
 
 # ------------------------------------------------------------------ tap-to-earn
 
-## Montant d'or gagné par un tap manuel (bouton "Frapper une pièce").
+## Montant d'or gagné par un tap manuel (toucher la scène village).
 ## Passe par le multiplicateur global, comme la production passive : le
 ## prestige rend aussi le tap plus rentable, cohérent avec la règle 3.2.
 func tap_gold_amount() -> float:

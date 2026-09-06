@@ -17,6 +17,16 @@ const PARCHMENT := Color("8a7a63")     # beige-parchemin — texte secondaire
 const TEXT := Color("ede3d0")          # texte principal, chaud sur fond sombre
 const LOCKED := Color("4a4038")        # texte/éléments verrouillés
 
+# Scène village (fond de secours quand le manifest de sprites n'en fournit pas) :
+# un seul dégradé continu ciel -> sol, du bleu nuit à la terre sombre, en
+# passant par la lueur cuivrée de l'horizon — pas deux blocs de couleur qui
+# se percutent.
+const SKY_TOP := Color("1a1a2e")       # nuit encre, en haut
+const SKY_HORIZON := Color("4a3220")   # lueur cuivrée à l'horizon
+const GROUND := Color("2e2418")        # terre, juste sous l'horizon
+const GROUND_DARK := Color("1c150e")   # terre plus sombre, premier plan
+const HUD_PANEL := Color(0.122, 0.09, 0.07, 0.86)   # PANEL translucide, par-dessus la scène
+
 # ---------------------------------------------------------------- polices
 const FONT_DISPLAY_PATH := "res://assets/fonts/Cinzel-Bold.ttf"     # titres, montants
 const FONT_BODY_PATH := "res://assets/fonts/SpectralRegular.ttf"    # texte courant
@@ -123,18 +133,18 @@ static func _style_buttons(theme: Theme, font: FontFile) -> void:
 	theme.set_color("font_hover_color", "PrimaryButton", Color("f0a868"))
 	theme.set_color("font_disabled_color", "PrimaryButton", LOCKED)
 
-	# Bouton d'action fréquente (tap) — or, distinct du cuivre réservé au prestige.
-	var tap_normal := _flat(Color("332612"), 3, GOLD)
-	var tap_hover := _flat(Color("40300f"), 3, Color("f5cc55"))
-	var tap_pressed := _flat(Color("241a0c"), 3, GOLD)
-	theme.set_stylebox("normal", "TapButton", tap_normal)
-	theme.set_stylebox("hover", "TapButton", tap_hover)
-	theme.set_stylebox("pressed", "TapButton", tap_pressed)
-	theme.set_font("font", "TapButton", font)
-	theme.set_font_size("font_size", "TapButton", 32)
-	theme.set_color("font_color", "TapButton", GOLD)
-	theme.set_color("font_hover_color", "TapButton", Color("f5cc55"))
-	theme.set_color("font_pressed_color", "TapButton", Color.WHITE)
+	# Bouton d'action fréquente (ouvrir le registre) — or, distinct du cuivre réservé au prestige.
+	var accent_normal := _flat(Color("332612"), 3, GOLD)
+	var accent_hover := _flat(Color("40300f"), 3, Color("f5cc55"))
+	var accent_pressed := _flat(Color("241a0c"), 3, GOLD)
+	theme.set_stylebox("normal", "AccentButton", accent_normal)
+	theme.set_stylebox("hover", "AccentButton", accent_hover)
+	theme.set_stylebox("pressed", "AccentButton", accent_pressed)
+	theme.set_font("font", "AccentButton", font)
+	theme.set_font_size("font_size", "AccentButton", 32)
+	theme.set_color("font_color", "AccentButton", GOLD)
+	theme.set_color("font_hover_color", "AccentButton", Color("f5cc55"))
+	theme.set_color("font_pressed_color", "AccentButton", Color.WHITE)
 
 	# Bouton discret (debug, sauvegarde) — presque invisible, texte parchemin.
 	var quiet_normal := _flat(Color.TRANSPARENT, 1, Color("3a332a"))
@@ -157,6 +167,12 @@ static func _style_panels(theme: Theme) -> void:
 	header.content_margin_top = 28
 	header.content_margin_bottom = 20
 	theme.set_stylebox("panel", "HeaderPanel", header)
+
+	# HUD par-dessus la scène village : même filet doré, fond translucide.
+	var hud := _flat(HUD_PANEL, 2, GOLD_DIM)
+	hud.content_margin_top = 20
+	hud.content_margin_bottom = 16
+	theme.set_stylebox("panel", "HudPanel", hud)
 
 	theme.set_stylebox("panel", "RowPanel", _flat(PANEL, 1, Color("332a1c")))
 	theme.set_stylebox("panel", "RowPanelAlt", _flat(PANEL_ALT, 1, Color("332a1c")))

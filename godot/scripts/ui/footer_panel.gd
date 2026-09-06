@@ -1,8 +1,9 @@
 class_name FooterPanel
 extends VBoxContainer
-## Pied de page : bouton de prestige + son indice, et actions utilitaires
-## (boutique, sauvegarde manuelle, cheat de debug).
+## Pied de page : accès au registre (action principale), bouton de prestige +
+## son indice, et actions utilitaires (boutique, sauvegarde manuelle, cheat debug).
 
+signal open_ledger_requested
 signal open_shop_requested
 
 var _prestige_btn: Button
@@ -17,6 +18,13 @@ static func create() -> FooterPanel:
 
 func _build() -> void:
 	add_theme_constant_override("separation", 6)
+
+	var ledger_btn := Button.new()
+	ledger_btn.theme_type_variation = "AccentButton"
+	ledger_btn.custom_minimum_size = Vector2(0, 72)
+	ledger_btn.text = "Registre — acheter des générateurs"
+	ledger_btn.pressed.connect(func(): open_ledger_requested.emit())
+	add_child(ledger_btn)
 
 	_prestige_btn = Button.new()
 	_prestige_btn.theme_type_variation = "PrimaryButton"

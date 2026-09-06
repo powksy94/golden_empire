@@ -1,12 +1,12 @@
 class_name ShopScreen
 extends Control
 ## Écran boutique, superposé à GameScreen (masqué par défaut). Assemble
-## ShopHeader + une liste de ShopRow peuplée via ShopCatalog ; n'implémente
+## OverlayHeader + une liste de ShopRow peuplée via ShopCatalog ; n'implémente
 ## lui-même ni le formatage (ShopCatalog) ni le rendu d'une ligne (ShopRow).
 
 signal closed
 
-var _header: ShopHeader
+var _header: OverlayHeader
 var _list: VBoxContainer
 var _booster_rows: Dictionary = {}   # id -> ShopRow
 
@@ -47,7 +47,7 @@ func _build() -> void:
 	root.add_theme_constant_override("separation", 12)
 	margin.add_child(root)
 
-	_header = ShopHeader.create()
+	_header = OverlayHeader.create("BOUTIQUE")
 	_header.close_pressed.connect(func():
 		visible = false
 		closed.emit()
@@ -118,6 +118,6 @@ func _configure_booster_row(row: ShopRow, id: String, b: Dictionary) -> void:
 
 func refresh() -> void:
 	var gems := int(GameState.data.economy["gems"])
-	_header.set_gems(gems)
+	_header.set_info("%d gemmes" % gems)
 	for id in _booster_rows:
 		(_booster_rows[id] as ShopRow).refresh_afford(gems)

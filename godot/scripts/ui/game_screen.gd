@@ -1,18 +1,17 @@
 class_name GameScreen
 extends Control
-## Composition de l'écran de jeu : en-tête, bouton de frappe, sélecteur de
-## mode d'achat, registre des générateurs, pied de page. Se tient à jour seule
-## via les signaux de GameState / Economy / Config ; main.gd ne fait que lui
-## relayer des messages de statut pendant la séquence de boot.
+## Composition de l'écran de jeu : la scène village en fond (VillageScene),
+## un HUD par-dessus (en-tête en haut, pied de page en bas, le milieu laisse
+## passer les touches vers la scène), et deux overlays masqués par défaut
+## (registre d'achat, boutique). Se tient à jour seule via les signaux de
+## GameState / Economy / Config ; main.gd ne fait que lui relayer des messages
+## de statut pendant la séquence de boot.
 
+var _village: VillageScene
 var _header: HeaderPanel
-var _diorama: DioramaView
-var _tap_btn: TapButton
-var _buy_mode: BuyModeSelector
-var _list: VBoxContainer
 var _footer: FooterPanel
+var _ledger: LedgerPanel
 var _shop: ShopScreen
-var _gen_rows: Dictionary = {}   # id -> GeneratorRow
 
 
 static func create() -> GameScreen:
@@ -26,14 +25,8 @@ func _ready() -> void:
 	GameState.gold_changed.connect(func(_g): _refresh())
 	GameState.gems_changed.connect(func(_g): _refresh())
 	Economy.production_changed.connect(func(_p): _refresh())
-	Economy.tapped.connect(func(_amount): _diorama.pulse())
-	Config.config_updated.connect(_on_config_updated)
+	Config.config_updated.connect(func(): _village.rebuild())
 	Economy.prestiged.connect(func(c, m): set_status("Prestige ! +%d pts de prestige — multiplicateur x%.2f" % [int(c), m]))
-
-
-func _on_config_updated() -> void:
-	_rebuild_generator_rows()
-	_diorama.rebuild()
 
 
 func set_status(text: String) -> void:
@@ -41,75 +34,51 @@ func set_status(text: String) -> void:
 
 
 func _build() -> void:
-	var background := ColorRect.new()
-	background.color = EmpireTheme.BG
-	background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	background.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(background)
+	_village = VillageScene.create()
+	add_child(_village)
 
-	var margin := MarginContainer.new()
-	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	margin.add_theme_constant_override("margin_left", 28)
-	margin.add_theme_constant_override("margin_right", 28)
-	margin.add_theme_constant_override("margin_top", 24)
-	margin.add_theme_constant_override("margin_bottom", 24)
-	add_child(margin)
+	# HUD : seuls l'en-tête et le pied de page interceptent les touches ; le
+	# reste (conteneurs, espace central) les laisse passer à la scène.
+	var hud := MarginContainer.new()
+	hud.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	hud.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hud.add_theme_constant_override("margin_left", 28)
+	hud.add_theme_constant_override("margin_right", 28)
+	hud.add_theme_constant_override("margin_top", 24)
+	hud.add_theme_constant_override("margin_bottom", 24)
+	add_child(hud)
 
-	var root := VBoxContainer.new()
-	root.add_theme_constant_override("separation", 18)
-	margin.add_child(root)
+	var col := VBoxContainer.new()
+	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hud.add_child(col)
 
 	_header = HeaderPanel.create()
-	root.add_child(_header)
+	_header.theme_type_variation = "HudPanel"
+	col.add_child(_header)
 
-	_diorama = DioramaView.create()
-	root.add_child(_diorama)
+	var spacer := Control.new()
+	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	col.add_child(spacer)
 
-	_tap_btn = TapButton.create()
-	root.add_child(_tap_btn)
-
-	_buy_mode = BuyModeSelector.create()
-	_buy_mode.mode_changed.connect(func(_m): _refresh())
-	root.add_child(_buy_mode)
-
-	_list = VBoxContainer.new()
-	_list.add_theme_constant_override("separation", 3)
-
-	var scroll := ScrollContainer.new()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	scroll.add_child(_list)
-	root.add_child(scroll)
-
+	var footer_panel := PanelContainer.new()
+	footer_panel.theme_type_variation = "HudPanel"
 	_footer = FooterPanel.create()
-	root.add_child(_footer)
+	footer_panel.add_child(_footer)
+	col.add_child(footer_panel)
 
-	_rebuild_generator_rows()
+	_ledger = LedgerPanel.create()
+	_footer.open_ledger_requested.connect(func(): _ledger.open())
+	add_child(_ledger)
 
 	_shop = ShopScreen.create()
 	_footer.open_shop_requested.connect(func(): _shop.open())
 	add_child(_shop)
 
-
-func _rebuild_generator_rows() -> void:
-	for c in _list.get_children():
-		c.queue_free()
-	_gen_rows.clear()
-	var i := 0
-	for def in Config.get_generators():
-		var row := GeneratorRow.create(def, i % 2 == 1)
-		_list.add_child(row)
-		_gen_rows[def.id] = row
-		i += 1
 	_refresh()
 
 
 func _refresh() -> void:
 	_header.refresh()
-	_diorama.refresh()
-	_tap_btn.refresh()
-	for id in _gen_rows:
-		var def := Config.get_generator(id)
-		var row: GeneratorRow = _gen_rows[id]
-		row.refresh(def, _buy_mode.mode)
+	_village.refresh()
 	_footer.refresh()
