@@ -5,7 +5,7 @@ extends RefCounted
 const SUFFIXES := ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"]
 
 
-static func short(value: float, decimals: int = 2) -> String:
+static func short(value: float, decimals: int = 1) -> String:
 	if value < 1000.0:
 		return String.num(value, 1 if value < 100.0 else 0)
 	var idx := 0
